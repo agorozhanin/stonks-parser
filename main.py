@@ -1,9 +1,15 @@
 import requests
 from bs4 import BeautifulSoup
-import re
+from datetime import datetime
 
 
-def get_parse_result() -> list:
+def time_to_timestamp(time: str) -> float:
+    str_datetime = ' '.join([str(datetime.now().strftime('%Y-%m-%d')), time])
+    datetime_timestamp = datetime.strptime(str_datetime, '%Y-%m-%d %H:%M:%S').timestamp()
+    return datetime_timestamp
+
+
+def get_parsed_list_result() -> list:
     response = requests.get('https://smart-lab.ru/q/Shares/')
     soup = BeautifulSoup(response.text, 'lxml')
     table = soup.find_all('table', class_="simple-little-table trades-table")
@@ -13,7 +19,7 @@ def get_parse_result() -> list:
         attributes = row.find_all('td')
         try:
             result_list.append({
-                'updateTime': attributes[1].text,  # в таймстеп
+                'updateTime': time_to_timestamp(attributes[1].text),
                 'companyName': attributes[2].text,
                 'tickerName': attributes[3].text,
                 'lastPrice': float(attributes[7].text),
@@ -31,4 +37,5 @@ def get_parse_result() -> list:
     return result_list
 
 
-print(get_parse_result())
+def handler():
+    get_parsed_list_result()
