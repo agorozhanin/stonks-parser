@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
+import operator
 
 
 def time_to_timestamp(time: str) -> float:
@@ -37,5 +38,16 @@ def get_parsed_list_result() -> list:
     return result_list
 
 
-def handler():
-    get_parsed_list_result()
+def handler(event, context):
+    result_list = get_parsed_list_result()
+    headers = event['headers']
+    sort_val = headers.get('Sort', None)
+    if sort_val is not None:
+        result_list = sorted(result_list, key=operator.itemgetter("percentUpdateStartYear"))
+    return {
+        'statusCode': 200,
+        'body': result_list,
+    }
+
+
+
